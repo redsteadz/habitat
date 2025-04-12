@@ -1,23 +1,9 @@
-"use client";
-import SignOutGit from "@/components/buttons/signOutGit";
-import { useSession } from "next-auth/react";
-import { Skeleton } from "@/components/ui/skeleton";
+import HobbyTracker from "@/components/hobby-tracker"
 
-export default function Dashboard() {
-  const { data: session, status } = useSession();
-
+export default function DashboardPage() {
   return (
-    <div>
-      {status === "loading" ? (
-        <Skeleton className="w-[100px] h-[20px] rounded-full" />
-      ) : session ? (
-        <div>
-          Welcome {session.user?.name}
-          <SignOutGit />
-        </div>
-      ) : (
-        <div>No active session</div>
-      )}
-    </div>
-  );
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-8">
+      <HobbyTracker />
+    </main>
+  )
 }

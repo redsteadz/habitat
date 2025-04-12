@@ -2,6 +2,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
+import { ThemeToggle } from "./theme-toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, LogIn, Home, Settings, Bell, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -51,7 +52,7 @@ export default function DynamicIsland() {
     if (user) {
       setIsExpanded(!isExpanded);
     } else {
-      signIn("github");
+      signIn("github", { redirectTo: "/dashboard" });
     }
   };
 
@@ -69,7 +70,7 @@ export default function DynamicIsland() {
           mass: 1,
         }}
         className={cn(
-          "bg-black text-white flex flex-col overflow-hidden shadow-lg",
+          "bg-white dark:bg-black text-white flex flex-col overflow-hidden shadow-lg",
           isExpanded ? "items-stretch" : "items-center justify-center",
         )}
         onMouseEnter={() => setIsHovered(true)}
@@ -96,6 +97,7 @@ export default function DynamicIsland() {
                 <span className="font-medium text-sm">
                   {isExpanded ? user.name : ""}
                 </span>
+                <span>{isExpanded ? <ThemeToggle /> : ""}</span>
               </div>
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
