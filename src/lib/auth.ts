@@ -1,17 +1,10 @@
-import { signIn, signOut } from "@/auth";
+"use server";
+import { signIn, signOut } from "@/server/auth/config";
 
 export const login = async (provider: string) => {
-  try {
-    await signIn(provider, { redirect: true, callbackUrl: "/" });
-  } catch (error) {
-    console.error("Login error:", error);
-  }
+  await signIn(provider, { redirectTo: "/" });
 };
 
 export const logout = async () => {
-  try {
-    await signOut({ redirect: true, callbackUrl: "/" });
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
+  await signOut({ redirectTo: "/" });
 };
