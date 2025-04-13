@@ -23,11 +23,12 @@ export async function POST(req: NextRequest) {
       console.log("User already exists: ", isExisting);
       return NextResponse.json({ message: "User logged in" });
     }
-
+    const createdAt = new Date().toISOString();
     const newUser: typeof usersTable.$inferInsert = {
       name,
       email,
       githubId,
+      createdAt,
     };
 
     console.log("New user: ", newUser);
