@@ -45,7 +45,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="container py-12 space-y-12">
+    <div className="m-auto container py-12 space-y-12">
       <section className="space-y-4 text-center">
         <motion.h1
           className="text-4xl md:text-5xl lg:text-6xl font-bold"
@@ -215,7 +215,7 @@ export default function HomePage() {
                 achieved their goals with HobbyStreak.
               </p>
             </div>
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="flex justify-center">
               <Link
                 href="/dashboard"
                 className="gap-2 min-w-[150px] justify-center"

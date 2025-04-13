@@ -6,8 +6,8 @@ import { db } from "./index";
 async function main() {
   const user: typeof usersTable.$inferInsert = {
     name: "John",
-    age: 30,
     email: "john@example.com",
+    githubId: "1",
   };
   await db.insert(usersTable).values(user);
   console.log("New user created!");
@@ -24,7 +24,7 @@ async function main() {
   await db
     .update(usersTable)
     .set({
-      age: 31,
+      email: "halooo",
     })
     .where(eq(usersTable.email, user.email));
   console.log("User info updated!");

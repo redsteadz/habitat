@@ -8,6 +8,7 @@ import { User, LogIn, Home, Settings, Bell, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "./ui/skeleton";
 import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function DynamicIsland() {
@@ -70,7 +71,7 @@ export default function DynamicIsland() {
           mass: 1,
         }}
         className={cn(
-          "bg-white dark:bg-black text-white flex flex-col overflow-hidden shadow-lg",
+          "bg-black text-white flex flex-col overflow-hidden shadow-lg",
           isExpanded ? "items-stretch" : "items-center justify-center",
         )}
         onMouseEnter={() => setIsHovered(true)}
@@ -84,43 +85,47 @@ export default function DynamicIsland() {
           )}
           onClick={handleToggle}
         >
-          {user ? (
-            <>
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={user.image || ""}
-                    alt={user.name || "User"}
-                  />
-                  <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-                <span className="font-medium text-sm">
-                  {isExpanded ? user.name : ""}
-                </span>
-                <span>{isExpanded ? <ThemeToggle /> : ""}</span>
-              </div>
-              <motion.div
-                animate={{ rotate: isExpanded ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {isExpanded ? <X size={18} /> : <Menu size={18} />}
-              </motion.div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="bg-gray-800 rounded-full p-1.5">
-                  <LogIn size={16} />
+          {status != "loading" ? (
+            user ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={user.image || ""}
+                      alt={user.name || "User"}
+                    />
+                    <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-sm">
+                    {isExpanded ? user.name : ""}
+                  </span>
+                  <span>{isExpanded ? <ThemeToggle /> : ""}</span>
                 </div>
-                <span className="font-medium text-sm">Sign In</span>
-              </div>
-              <motion.div
-                animate={{ x: isHovered ? 3 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <LogIn size={16} />
-              </motion.div>
-            </>
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isExpanded ? <X size={18} /> : <Menu size={18} />}
+                </motion.div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="bg-gray-800 rounded-full p-1.5">
+                    <LogIn size={16} />
+                  </div>
+                  <span className="font-medium text-sm">Sign In</span>
+                </div>
+                <motion.div
+                  animate={{ x: isHovered ? 3 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <LogIn size={16} />
+                </motion.div>
+              </>
+            )
+          ) : (
+            <Skeleton className="w-[100px] h-[20px] rounded-full" />
           )}
         </div>
 
