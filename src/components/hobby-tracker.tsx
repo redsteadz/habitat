@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Check, Calendar, Sparkles, CloudRain } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { format, subDays } from "date-fns";
 import { AnimatedButton } from "./animated-button";
 import { CardBackground } from "./card-background";
+import { Completion, Habit, habitsTable } from "@/server/db/schema";
 
 // Mock data - Actual hobbies with tracking for the last 7 days
 const initialHobbies = [
@@ -82,8 +83,16 @@ interface Hobby {
   history: { date: Date; status: "done" | "skipped" }[];
   todayStatus: HobbyStatus;
 }
+type HabitWithCompletions = Habit & {
+  completions: Completion[];
+  todayStatus?: "done" | "skipped" | null;
+};
 
-export default function HobbyTracker() {
+export default function HobbyTracker({
+  habits,
+}: {
+  habits: HabitWithCompletions[];
+}) {
   const [hobbies, setHobbies] = useState<Hobby[]>(initialHobbies);
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
@@ -92,6 +101,25 @@ export default function HobbyTracker() {
   const [clickOrigins, setClickOrigins] = useState<
     Record<number, { x: number; y: number }>
   >({});
+
+  const setTodayStatus = () => {
+    habits.forEach((habit) => {
+      const completion = habit.completions.find(
+        (completion) =>
+          format(new Date(completion.date), "yyyy-MM-dd") ===
+          format(today, "yyyy-MM-dd"),
+      );
+      if (completion) {
+        habit.todayStatus = completion.completed ? "done" : "skipped";
+      } else {
+        habit.todayStatus = null;
+      }
+    });
+  };
+
+  useEffect(() => {
+    setTodayStatus();
+  }, [habits]);
 
   const markHobbyStatus = (
     id: number,
@@ -243,7 +271,7 @@ export default function HobbyTracker() {
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Hobby Tracker</h1>
+        <h1 className="text-3xl font-bold">Habits</h1>
         <Button
           onClick={() => setShowAddForm(!showAddForm)}
           variant="outline"
@@ -309,7 +337,7 @@ export default function HobbyTracker() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
-          {hobbies.map((hobby) => (
+          {habits.map((hobby) => (
             <motion.div
               key={hobby.id}
               initial={{ opacity: 0, y: 20 }}
@@ -322,7 +350,7 @@ export default function HobbyTracker() {
                 <AnimatePresence mode="wait">
                   <CardBackground
                     key={`bg-${hobby.id}-${hobby.todayStatus}`}
-                    status={hobby.todayStatus}
+                    status={hobby.todayStatus!}
                     hobbyId={hobby.id}
                     originX={clickOrigins[hobby.id]?.x || 0.5}
                     originY={clickOrigins[hobby.id]?.y || 0.5}
@@ -424,7 +452,7 @@ export default function HobbyTracker() {
                               : "text-muted-foreground",
                         )}
                       >
-                        {hobby.category}
+                        {"Category"}
                       </p>
                     </div>
                     <Button
@@ -606,17 +634,17 @@ export default function HobbyTracker() {
                       Last 7 days:
                     </div>
                     <div className="flex justify-between w-full">
-                      {hobby.history.slice(0, 7).map((day, index) => (
+                      {hobby.completions.slice(0, 7).map((day, index) => (
                         <div key={index} className="flex flex-col items-center">
                           <div
                             className={cn(
                               "w-8 h-8 rounded-full flex items-center justify-center mb-1",
-                              day.status === "done"
+                              day.completed
                                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
                                 : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500",
                             )}
                           >
-                            {day.status === "done" ? (
+                            {day.completed ? (
                               <Check className="h-4 w-4" />
                             ) : (
                               <X className="h-4 w-4" />

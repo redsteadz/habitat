@@ -14,27 +14,33 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Assuming you have a function to add a user to your database
-    // await addUserToDatabase({ name, email, githubId });
-    const isExisting = await db.query.usersTable.findFirst({
-      where: eq(usersTable.githubId, githubId),
-    });
-    if (isExisting) {
-      console.log("User already exists: ", isExisting);
-      return NextResponse.json({ message: "User logged in" });
+    // Validate input
+    if (!name || !email || !githubId) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
+
+    // Check if the user already exists
+    const existingUsers = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.githubId, githubId));
+    const existingUser = existingUsers[0];
+    if (existingUser) {
+      return NextResponse.json({ id: existingUser.id });
+    }
+
+    // Create a new user
     const createdAt = new Date().toISOString();
-    const newUser: typeof usersTable.$inferInsert = {
-      name,
-      email,
-      githubId,
-      createdAt,
-    };
+    const [newUser] = await db
+      .insert(usersTable)
+      .values({ name, email, githubId, createdAt })
+      .returning();
 
-    console.log("New user: ", newUser);
-
-    await db.insert(usersTable).values(newUser);
-    return NextResponse.json({ message: "User signed up successfully" });
+    // Return the new user's ID
+    return NextResponse.json({ id: newUser.id });
   } catch (error) {
     console.error("Error signing up user:", error);
     return NextResponse.json(

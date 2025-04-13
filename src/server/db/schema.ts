@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, InferModel } from "drizzle-orm";
 import {
   integer,
   pgTable,
@@ -36,12 +36,14 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
   habits: many(habitsTable),
 }));
 
-// export const completionsTable = pgTable("completions", {
-//   id: varchar({ length: 255 }).primaryKey(),
-//   habitId: varchar({ length: 255 }).notNull(),
-//   date: date(),
-//   completed: boolean().notNull(),
-// });
+export const completionsTable = pgTable("completions", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  habitId: integer()
+    .notNull()
+    .references(() => habitsTable.id),
+  date: date().notNull(),
+  completed: boolean().notNull(),
+});
 
 export const habitsTable = pgTable("habits", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -49,20 +51,35 @@ export const habitsTable = pgTable("habits", {
   createdAt: date(),
   startDate: date(),
   frequency: text({ enum: ["daily", "weekly", "custom"] }).notNull(),
-  streak: integer().notNull(),
-  userId: integer().notNull(),
-  // Holds streaks
-  // {startDate: number, endDate: number, streak: number}[]
-  completions: integer().notNull(),
+  streak: integer().notNull().default(0),
+  userId: integer()
+    .notNull()
+    .references(() => usersTable.id),
   status: text({ enum: ["active", "archived", "completed"] }).notNull(),
 });
 
-export const habitsRelations = relations(habitsTable, ({ one }) => ({
+export const habitsRelations = relations(habitsTable, ({ one, many }) => ({
   user: one(usersTable, {
     fields: [habitsTable.userId],
     references: [usersTable.id],
   }),
+  completions: many(completionsTable),
 }));
+
+export const completionsTableRelations = relations(
+  completionsTable,
+  ({ one }) => ({
+    habit: one(habitsTable, {
+      fields: [completionsTable.habitId],
+      references: [habitsTable.id],
+    }),
+  }),
+);
+
+// typing
+export type Habit = typeof habitsTable.$inferSelect;
+export type HabitInsert = typeof habitsTable.$inferInsert;
+export type Completion = typeof completionsTable.$inferSelect;
 
 // A user can have many habits
 

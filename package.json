@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:seed": "npx tsx src/server/db/seed.ts",
     "db:studio": "drizzle-kit studio"

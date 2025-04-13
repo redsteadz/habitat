@@ -15,6 +15,13 @@
       "when": 1744556416125,
       "tag": "0001_big_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1744561740910,
+      "tag": "0002_overconfident_blonde_phantom",
+      "breakpoints": true
     }
   ]
 }
