@@ -2,7 +2,7 @@ POST localhost:3000/api/habit/create
 Content-Type: application/json
 
 {
-  "name": "Habit Name",
+  "name": "HELLO NEGGAS",
   "frequency": "daily",
   "startDate": "2023-10-01",
   "userId": 1

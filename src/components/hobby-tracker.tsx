@@ -75,14 +75,6 @@ const initialHobbies = [
 
 type HobbyStatus = "done" | "skipped" | null;
 
-interface Hobby {
-  id: number;
-  name: string;
-  category: string;
-  streak: number;
-  history: { date: Date; status: "done" | "skipped" }[];
-  todayStatus: HobbyStatus;
-}
 type HabitWithCompletions = Habit & {
   completions: Completion[];
   todayStatus?: "done" | "skipped" | null;
@@ -93,7 +85,7 @@ export default function HobbyTracker({
 }: {
   habits: HabitWithCompletions[];
 }) {
-  const [hobbies, setHobbies] = useState<Hobby[]>(initialHobbies);
+  const [hobbies, setHobbies] = useState<HabitWithCompletions[]>(habits);
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -102,24 +94,15 @@ export default function HobbyTracker({
     Record<number, { x: number; y: number }>
   >({});
 
-  const setTodayStatus = () => {
-    habits.forEach((habit) => {
-      const completion = habit.completions.find(
-        (completion) =>
-          format(new Date(completion.date), "yyyy-MM-dd") ===
-          format(today, "yyyy-MM-dd"),
-      );
-      if (completion) {
-        habit.todayStatus = completion.completed ? "done" : "skipped";
-      } else {
-        habit.todayStatus = null;
-      }
-    });
-  };
-
-  useEffect(() => {
-    setTodayStatus();
-  }, [habits]);
+  // const setCompletions = () => {
+  //   setHobbies((prev)=>{
+  //     prev.map((hobby)=>{})
+  //   })
+  // };
+  //
+  // useEffect(() => {
+  //   setCompletions();
+  // }, []);
 
   const markHobbyStatus = (
     id: number,
@@ -194,13 +177,17 @@ export default function HobbyTracker({
       status: Math.random() > 0.5 ? "done" : "skipped",
     })) as { date: Date; status: "done" | "skipped" }[];
 
-    const newHobbyItem: Hobby = {
+    const newHobbyItem: HabitWithCompletions = {
       id: newId,
       name: newHobby,
-      category: newCategory,
       streak: 0,
-      history: emptyHistory,
+      createdAt: new Date().toISOString(),
+      startDate: new Date().toISOString(),
+      frequency: "daily",
+      completions: [],
+      userId: 333,
       todayStatus: null,
+      status: "active",
     };
 
     setHobbies((prev) => [...prev, newHobbyItem]);
@@ -337,7 +324,7 @@ export default function HobbyTracker({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
-          {habits.map((hobby) => (
+          {hobbies.map((hobby) => (
             <motion.div
               key={hobby.id}
               initial={{ opacity: 0, y: 20 }}
@@ -494,7 +481,7 @@ export default function HobbyTracker({
                             : "text-muted-foreground",
                       )}
                     >
-                      {format(today, "EEEE, MMMM d")}
+                      {format(new Date(hobby.createdAt!), "EEEE, MMMM d")}
                     </span>
                   </div>
 
