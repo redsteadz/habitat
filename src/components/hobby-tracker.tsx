@@ -116,7 +116,7 @@ export default function HobbyTracker({
           ),
         );
         if (todayCompletion) {
-          console.log("todayCompletion: ", todayCompletion);
+          // console.log("todayCompletion: ", todayCompletion);
           hobby.todayStatus = todayCompletion.completed ? "done" : "skipped";
         } else {
           hobby.todayStatus = null;
@@ -133,7 +133,7 @@ export default function HobbyTracker({
             id: completion ? completion.id : 0,
             habitId: hobby.id,
             date: date.toISOString(),
-            completed: completion ? true : false,
+            completed: completion?.completed ? true : false,
           });
         }
         return {
@@ -178,36 +178,38 @@ export default function HobbyTracker({
         toast.error("Error updating habit status.");
       }
     };
-    setHobbies((prev) =>
-      prev.map((hobby) => {
-        if (hobby.id === id) {
-          // If clicking the same status again, toggle it off
-          if (hobby.todayStatus === status) {
-            // hobby.completions[today.getDay()].completed = false;
-            return hobby;
-          }
-
-          // Calculate new streak
-          let newStreak = hobby.streak;
-          if (status === "done") {
-            newStreak = hobby.streak + 1;
-            hobby.completions[today.getDay()].completed = true;
-            toast.success("Hobby marked as done! 🎉");
-          } else if (status === "skipped") {
-            hobby.completions[today.getDay()].completed = false;
-            newStreak = 0;
-          }
-
-          return {
-            ...hobby,
-            todayStatus: status,
-            streak: newStreak,
-          };
+    let chng = false;
+    let newHobbies = hobbies.map((hobby) => {
+      if (hobby.id === id) {
+        // If clicking the same status again, toggle it off
+        if (hobby.todayStatus === status) {
+          // hobby.completions[today.getDay()].completed = false;
+          return hobby;
         }
-        return hobby;
-      }),
-    );
-    makeUpdateCompletionRequest();
+        chng = true;
+        // Calculate new streak
+        let newStreak = hobby.streak;
+        if (status === "done") {
+          newStreak = hobby.streak + 1;
+          hobby.completions[today.getDay()].completed = true;
+          toast.success("Hobby marked as done! 🎉");
+        } else if (status === "skipped") {
+          hobby.completions[today.getDay()].completed = false;
+          newStreak = 0;
+        }
+
+        return {
+          ...hobby,
+          todayStatus: status,
+          streak: newStreak,
+        };
+      }
+      return hobby;
+    });
+    if (chng) {
+      makeUpdateCompletionRequest();
+      setHobbies(newHobbies);
+    }
   };
 
   const addHobby = () => {

@@ -39,12 +39,12 @@ export async function POST(req: NextRequest) {
       status: "active",
     };
 
-    console.log("New habit: ", newHabit);
+    // console.log("New habit: ", newHabit);
 
-    await db.insert(habitsTable).values(newHabit);
+    const habit = await db.insert(habitsTable).values(newHabit).returning();
     return NextResponse.json({
       message: "Habit created successfully",
-      habit: newHabit,
+      habit: habit[0],
     });
   } catch (error) {
     console.error("Error creating habit:", error);

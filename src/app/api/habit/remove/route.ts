@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 // Create new habits for the user
 import { db } from "@/server/db";
-import { Habit, habitsTable, usersTable } from "@/server/db/schema";
+import {
+  completionsTable,
+  Habit,
+  habitsTable,
+  usersTable,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 // DEV - Create habits for given user id
@@ -12,6 +17,7 @@ export async function POST(req: NextRequest) {
   const { habitId, userMail } = await req.json();
 
   if (!habitId || !userMail) {
+    console.log(habitId, userMail);
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 },
@@ -38,6 +44,9 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
+    await db
+      .delete(completionsTable)
+      .where(eq(completionsTable.habitId, habitId));
     await db.delete(habitsTable).where(eq(habitsTable.id, habit.id));
     return NextResponse.json({
       message: "Habit removed successfully",

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
   const { habitId, userMail, status } = await req.json();
 
   if (!habitId || !userMail || status == undefined) {
+    console.log(habitId, userMail, status);
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 },
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       habitId: habit.id,
     };
 
-    console.log(newCompletion);
+    // console.log(newCompletion);
 
     let isExisting = await db.query.completionsTable.findFirst({
       where: and(
@@ -69,6 +70,20 @@ export async function POST(req: NextRequest) {
         .returning();
     } else if (isExisting.completed != status) {
       // console.log("Updating completion");
+      const habit = await db.query.habitsTable.findFirst({
+        where: eq(habitsTable.id, habitId),
+      });
+
+      let newStreak = habit?.streak!;
+      if (status) {
+        newStreak++;
+      } else newStreak = 0;
+
+      await db
+        .update(habitsTable)
+        .set({ streak: newStreak })
+        .where(eq(habitsTable.id, habitId));
+
       completion = await db
         .update(completionsTable)
         .set({

@@ -31,7 +31,6 @@ async function main() {
     frequency: "daily",
     streak: 0,
     userId: 1,
-    completions: 0,
     status: "active",
   };
   await db.insert(usersTable).values(user);

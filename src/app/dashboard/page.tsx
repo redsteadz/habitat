@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     },
   });
 
-  console.log("Habits: ", habits);
+  // console.log("Habits: ", habits);
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-8">
       <HobbyTracker habits={habits} />
