@@ -16,10 +16,17 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { format, subDays } from "date-fns";
+import { addDays, format, subDays } from "date-fns";
 import { AnimatedButton } from "./animated-button";
 import { CardBackground } from "./card-background";
-import { Completion, Habit, habitsTable } from "@/server/db/schema";
+import axios from "axios";
+import {
+  Completion,
+  completionsTable,
+  Habit,
+  habitsTable,
+} from "@/server/db/schema";
+import { useSession } from "next-auth/react";
 
 // Mock data - Actual hobbies with tracking for the last 7 days
 const initialHobbies = [
@@ -85,6 +92,7 @@ export default function HobbyTracker({
 }: {
   habits: HabitWithCompletions[];
 }) {
+  const session = useSession();
   const [hobbies, setHobbies] = useState<HabitWithCompletions[]>(habits);
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
@@ -94,15 +102,51 @@ export default function HobbyTracker({
     Record<number, { x: number; y: number }>
   >({});
 
-  // const setCompletions = () => {
-  //   setHobbies((prev)=>{
-  //     prev.map((hobby)=>{})
-  //   })
-  // };
-  //
-  // useEffect(() => {
-  //   setCompletions();
-  // }, []);
+  const setCompletions = () => {
+    setHobbies((prev) => {
+      return prev.map((hobby) => {
+        let newCompletions: Completion[] = [];
+        // for each hobby, return the completion of the last 7 days
+        // from last saturday to next friday
+        const lastSat = subDays(today, today.getDay() % 7);
+        // set todayStatus to the completion of today
+        const todayCompletion = hobby.completions.find((c) =>
+          format(new Date(c.date), "yyyy-MM-dd").includes(
+            format(today, "yyyy-MM-dd"),
+          ),
+        );
+        if (todayCompletion) {
+          console.log("todayCompletion: ", todayCompletion);
+          hobby.todayStatus = todayCompletion.completed ? "done" : "skipped";
+        } else {
+          hobby.todayStatus = null;
+        }
+
+        for (let i = 0; i < 7; i++) {
+          const date = addDays(lastSat, i);
+          const completion = hobby.completions.find((c) =>
+            format(new Date(c.date), "yyyy-MM-dd").includes(
+              format(date, "yyyy-MM-dd"),
+            ),
+          );
+          newCompletions.push({
+            id: completion ? completion.id : 0,
+            habitId: hobby.id,
+            date: date.toISOString(),
+            completed: completion ? true : false,
+          });
+        }
+        return {
+          ...hobby,
+          completions: newCompletions,
+        };
+      });
+    });
+  };
+
+  useEffect(() => {
+    setCompletions();
+  }, []);
 
   const markHobbyStatus = (
     id: number,
@@ -122,23 +166,35 @@ export default function HobbyTracker({
       [id]: { x: originX, y: originY },
     }));
 
+    const makeUpdateCompletionRequest = async () => {
+      const res = await axios.post("/api/completion/update", {
+        habitId: id,
+        userMail: session.data?.user?.email,
+        status: status === "done" ? true : false,
+      });
+      if (res.status === 200) {
+        toast.success("Habit status updated successfully!");
+      } else {
+        toast.error("Error updating habit status.");
+      }
+    };
     setHobbies((prev) =>
       prev.map((hobby) => {
         if (hobby.id === id) {
           // If clicking the same status again, toggle it off
           if (hobby.todayStatus === status) {
-            return {
-              ...hobby,
-              todayStatus: null,
-              streak: status === "done" ? hobby.streak - 1 : 0,
-            };
+            // hobby.completions[today.getDay()].completed = false;
+            return hobby;
           }
 
           // Calculate new streak
           let newStreak = hobby.streak;
           if (status === "done") {
             newStreak = hobby.streak + 1;
+            hobby.completions[today.getDay()].completed = true;
+            toast.success("Hobby marked as done! 🎉");
           } else if (status === "skipped") {
+            hobby.completions[today.getDay()].completed = false;
             newStreak = 0;
           }
 
@@ -151,54 +207,57 @@ export default function HobbyTracker({
         return hobby;
       }),
     );
-
-    const hobby = hobbies.find((h) => h.id === id);
-    if (hobby) {
-      if (status === "done") {
-        //         title: "Great job! 🎉",
-        // description: `You completed "${hobby.name}" today!`,
-        // duration: 3000,
-
-        toast.success("Great job! 🎉");
-      } else if (status === "skipped") {
-        toast.warning("Maybe tomorrow");
-      }
-    }
+    makeUpdateCompletionRequest();
   };
 
   const addHobby = () => {
     if (!newHobby.trim()) return;
 
-    const newId = Math.max(0, ...hobbies.map((h) => h.id)) + 1;
-
-    // Create empty history for the last 7 days
-    const emptyHistory = Array.from({ length: 7 }, (_, i) => ({
-      date: subDays(new Date(), i + 1),
-      status: Math.random() > 0.5 ? "done" : "skipped",
-    })) as { date: Date; status: "done" | "skipped" }[];
-
-    const newHobbyItem: HabitWithCompletions = {
-      id: newId,
-      name: newHobby,
-      streak: 0,
-      createdAt: new Date().toISOString(),
-      startDate: new Date().toISOString(),
-      frequency: "daily",
-      completions: [],
-      userId: 333,
-      todayStatus: null,
-      status: "active",
-    };
-
-    setHobbies((prev) => [...prev, newHobbyItem]);
-    setNewHobby("");
-    setNewCategory("General");
-    setShowAddForm(false);
+    try {
+      const userMail = session.data?.user?.email;
+      const makeRequest = async () => {
+        // Create empty history for the last 7 days
+        const res = await axios.post("/api/habit/create", {
+          name: newHobby,
+          frequency: "daily",
+          userMail,
+        });
+        const newHobbyItem: HabitWithCompletions = res.data.habit;
+        const lastSat = subDays(today, today.getDay() % 7);
+        newHobbyItem.completions = Array.from({ length: 7 }, (_, i) => ({
+          id: i,
+          habitId: newHobbyItem.id,
+          date: subDays(lastSat, i).toISOString(),
+          completed: false,
+        }));
+        setHobbies((prev) => [...prev, newHobbyItem]);
+        setNewHobby("");
+        setNewCategory("General");
+        setShowAddForm(false);
+      };
+      makeRequest();
+    } catch (error) {
+      console.log("Error adding hobby:", error);
+    }
 
     toast.success("Hobby added! 🎉");
   };
 
   const deleteHobby = (id: number) => {
+    const userMail = session.data?.user?.email;
+    const makeRequest = async () => {
+      const resp = await axios.post("/api/habit/remove", {
+        habitId: id,
+        userMail,
+      });
+      if (resp.status === 200) {
+        toast.success("Hobby removed successfully!");
+      } else {
+        toast.error("Error removing hobby.");
+      }
+    };
+    makeRequest();
+
     const hobby = hobbies.find((h) => h.id === id);
     setHobbies((prev) => prev.filter((hobby) => hobby.id !== id));
 

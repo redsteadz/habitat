@@ -1,23 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 // Create new habits for the user
 import { db } from "@/server/db";
-import { habitsTable, usersTable } from "@/server/db/schema";
+import {
+  Completion,
+  completionsTable,
+  Habit,
+  habitsTable,
+  usersTable,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { assert } from "console";
 
 // DEV - Create habits for given user id
 // PROD - Create habits for authenticated user id
 
 export async function POST(req: NextRequest) {
   // take an array of habits and create them
-  const { name, frequency, userMail } = await req.json();
+  const { habitId, userMail, status } = await req.json();
 
-  if (!name || !frequency || !userMail) {
+  if (!habitId || !userMail || !status) {
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 },
     );
   }
-
+  assert(typeof status == "boolean");
   try {
     const userId = await db.query.usersTable
       .findFirst({
@@ -27,24 +34,29 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
-    const createdAt = new Date().toISOString();
-    const startDate = new Date().toISOString();
-    const newHabit: typeof habitsTable.$inferInsert = {
-      name,
-      createdAt,
-      startDate,
-      frequency,
-      streak: 0,
-      userId,
-      status: "active",
+    const habit = await db.query.habitsTable.findFirst({
+      where: eq(habitsTable.id, habitId),
+    });
+    if (!habit) {
+      return NextResponse.json(
+        {
+          message: "Habit not found",
+        },
+        { status: 404 },
+      );
+    }
+
+    const newCompletion: typeof completionsTable.$inferInsert = {
+      date: new Date().toISOString(),
+      completed: status,
+      habitId: habit.id,
     };
 
-    console.log("New habit: ", newHabit);
+    const completion = await db.insert(completionsTable).values(newCompletion);
 
-    await db.insert(habitsTable).values(newHabit);
     return NextResponse.json({
-      message: "Habit created successfully",
-      habit: newHabit,
+      message: "Completion added successfully",
+      completion: completion,
     });
   } catch (error) {
     console.error("Error creating habit:", error);

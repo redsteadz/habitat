@@ -1,7 +1,7 @@
 import HobbyTracker from "@/components/hobby-tracker";
 import { db } from "@/server/db";
-import { habitsTable } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { completionsTable, habitsTable } from "@/server/db/schema";
+import { asc, eq } from "drizzle-orm";
 import { usersTable } from "@/server/db/schema";
 import { auth } from "../api/auth/[...nextauth]/route";
 
@@ -21,7 +21,9 @@ export default async function DashboardPage() {
   const habits = await db.query.habitsTable.findMany({
     where: eq(habitsTable.userId, userId[0]?.id),
     with: {
-      completions: true,
+      completions: {
+        orderBy: (completions, { asc }) => [asc(completions.date)],
+      },
     },
   });
 
