@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { addDays, format, subDays } from "date-fns";
+import { addDays, format, formatISO, previousDay, subDays } from "date-fns";
 import { AnimatedButton } from "./animated-button";
 import { CardBackground } from "./card-background";
 import axios from "axios";
@@ -97,7 +97,7 @@ export default function HobbyTracker({
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
-  const today = new Date();
+  const today = addDays(new Date(), 3);
   const [clickOrigins, setClickOrigins] = useState<
     Record<number, { x: number; y: number }>
   >({});
@@ -179,6 +179,11 @@ export default function HobbyTracker({
       }
     };
     let chng = false;
+    let yesterday = formatISO(subDays(new Date(today), 1), {
+      representation: "date",
+    });
+
+    // TODO: Update Streak properly !
     let newHobbies = hobbies.map((hobby) => {
       if (hobby.id === id) {
         // If clicking the same status again, toggle it off
@@ -186,12 +191,22 @@ export default function HobbyTracker({
           // hobby.completions[today.getDay()].completed = false;
           return hobby;
         }
+        console.log(yesterday);
+        let isPrevCompleted = hobby.completions.filter(
+          (e) => formatISO(e.date, { representation: "date" }) == yesterday,
+        );
+
+        console.log(hobby.completions);
+
         chng = true;
+        let newStreak = 0;
+        if (isPrevCompleted.length > 0 && isPrevCompleted[0].completed)
+          newStreak = hobby.streak;
+        console.log("Previous Day", isPrevCompleted);
         // Calculate new streak
-        let newStreak = hobby.streak;
         if (status === "done") {
-          newStreak = hobby.streak + 1;
           hobby.completions[today.getDay()].completed = true;
+          newStreak++;
           toast.success("Hobby marked as done! 🎉");
         } else if (status === "skipped") {
           hobby.completions[today.getDay()].completed = false;

@@ -11,6 +11,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import { assert } from "console";
 import { stat } from "fs";
+import { addDays, subDays } from "date-fns";
 
 // DEV - Create habits for given user id
 // PROD - Create habits for authenticated user id
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
-    const today = new Date().toISOString();
+    const today = addDays(new Date(), 1).toISOString();
     const newCompletion: typeof completionsTable.$inferInsert = {
       date: today,
       completed: status,
@@ -62,28 +63,23 @@ export async function POST(req: NextRequest) {
         eq(completionsTable.habitId, habitId),
       ),
     });
+    let yesterday = subDays(new Date(today), 3).toISOString();
+    let previousCompletion = await db.query.completionsTable.findFirst({
+      where: and(
+        eq(completionsTable.date, yesterday),
+        eq(completionsTable.habitId, habitId),
+      ),
+    });
+
     let completion;
     if (!isExisting) {
+      // IF not existing re use and update
       completion = await db
         .insert(completionsTable)
         .values(newCompletion)
         .returning();
     } else if (isExisting.completed != status) {
       // console.log("Updating completion");
-      const habit = await db.query.habitsTable.findFirst({
-        where: eq(habitsTable.id, habitId),
-      });
-
-      let newStreak = habit?.streak!;
-      if (status) {
-        newStreak++;
-      } else newStreak = 0;
-
-      await db
-        .update(habitsTable)
-        .set({ streak: newStreak })
-        .where(eq(habitsTable.id, habitId));
-
       completion = await db
         .update(completionsTable)
         .set({
@@ -96,9 +92,25 @@ export async function POST(req: NextRequest) {
           ),
         )
         .returning();
-      if (status) {
-      }
     }
+
+    let newStreak = 0;
+    if (previousCompletion?.completed) {
+      const habit = await db.query.habitsTable.findFirst({
+        where: eq(habitsTable.id, habitId),
+      });
+
+      newStreak = habit?.streak!;
+    }
+
+    if (status) {
+      newStreak++;
+    } else newStreak = 0;
+
+    await db
+      .update(habitsTable)
+      .set({ streak: newStreak })
+      .where(eq(habitsTable.id, habitId));
 
     return NextResponse.json({
       message: "Completion added successfully",
