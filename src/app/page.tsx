@@ -55,7 +55,7 @@ export default function HomePage() {
         >
           Build Better Habits with{" "}
           <span className="text-emerald-500 dark:text-emerald-400">
-            HobbyStreak
+            Habitat
           </span>
         </motion.h1>
         <motion.p
@@ -212,7 +212,7 @@ export default function HomePage() {
               </h3>
               <p className="text-muted-foreground max-w-2xl text-center">
                 Join thousands of users who have improved their habits and
-                achieved their goals with HobbyStreak.
+                achieved their goals with Habitat.
               </p>
             </div>
             <Button asChild size="lg" className="flex justify-center">
