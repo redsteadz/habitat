@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
-    const today = addDays(new Date(), 1).toISOString();
+    const today = addDays(new Date(), 0).toISOString();
     const newCompletion: typeof completionsTable.$inferInsert = {
       date: today,
       completed: status,
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         eq(completionsTable.habitId, habitId),
       ),
     });
-    let yesterday = subDays(new Date(today), 3).toISOString();
+    let yesterday = subDays(new Date(today), 1).toISOString();
     let previousCompletion = await db.query.completionsTable.findFirst({
       where: and(
         eq(completionsTable.date, yesterday),

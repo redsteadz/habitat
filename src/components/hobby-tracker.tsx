@@ -97,7 +97,7 @@ export default function HobbyTracker({
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
-  const today = addDays(new Date(), 3);
+  const today = addDays(new Date(), 0);
   const [clickOrigins, setClickOrigins] = useState<
     Record<number, { x: number; y: number }>
   >({});
@@ -421,64 +421,6 @@ export default function HobbyTracker({
                 </AnimatePresence>
 
                 {/* Radiating animation overlay */}
-                <AnimatePresence>
-                  {hobby.todayStatus === "done" && (
-                    <motion.div
-                      key={`radiate-done-${hobby.id}`}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{
-                        opacity: [0, 0.7, 0.5, 0.3],
-                        scale: [0, 1.5, 2.5, 4],
-                      }}
-                      exit={{
-                        opacity: 0,
-                        scale: 4,
-                        transition: { duration: 0.5 },
-                      }}
-                      transition={{
-                        duration: 1.2,
-                        ease: [0.22, 1, 0.36, 1],
-                        times: [0, 0.3, 0.6, 1],
-                      }}
-                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-emerald-400/20 dark:bg-emerald-500/30 pointer-events-none z-0 backdrop-blur-sm"
-                      style={{
-                        originX: 0.5,
-                        originY: 0.5,
-                        left: `${(clickOrigins[hobby.id]?.x || 0.5) * 100}%`,
-                        top: `${(clickOrigins[hobby.id]?.y || 0.5) * 100}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    />
-                  )}
-                  {hobby.todayStatus === "skipped" && (
-                    <motion.div
-                      key={`radiate-skip-${hobby.id}`}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{
-                        opacity: [0, 0.7, 0.5, 0.3],
-                        scale: [0, 1.5, 2.5, 4],
-                      }}
-                      exit={{
-                        opacity: 0,
-                        scale: 4,
-                        transition: { duration: 0.5 },
-                      }}
-                      transition={{
-                        duration: 1.2,
-                        ease: [0.22, 1, 0.36, 1],
-                        times: [0, 0.3, 0.6, 1],
-                      }}
-                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-300/30 dark:bg-slate-600/30 pointer-events-none z-0 backdrop-blur-sm"
-                      style={{
-                        originX: 0.5,
-                        originY: 0.5,
-                        left: `${(clickOrigins[hobby.id]?.x || 0.5) * 100}%`,
-                        top: `${(clickOrigins[hobby.id]?.y || 0.5) * 100}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
 
                 <div
                   className={cn(
