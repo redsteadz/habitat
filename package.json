@@ -12,6 +12,7 @@
     "db:push": "drizzle-kit push",
     "db:seed": "npx tsx src/server/db/seed.ts",
     "db:studio": "drizzle-kit studio"
+    "netlify:prod": "netlify deploy --prod --build"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

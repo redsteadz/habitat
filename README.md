@@ -21,6 +21,18 @@ Habitat is a modern habit tracking application built with Next.js, focusing on p
 - **UI Components:** Radix UI, shadcn/ui
 - **Deployment:** Vercel/Netlify ready
 
+## TODO
+- [ ] Hobby: Choose and modify completions of previous days
+- [ ] Hobby: View Hobby in detail giving information of past completions and helpful data 
+    - [ ] Best streaks Bar 
+    - [ ] Calendar heatmap of completions 
+    - [ ] Frequency map of days within months 
+    - [ ] Have tree/ui based feedback on growing a habitat - tree or anything as such 
+- [ ] Add optimizations
+    - [ ] Faster rendering (Reduce overhead calculations and manipulations)
+    - [ ] Faster response time (Use minimal amount of SQL to get data)
+
+
 ## Getting Started
 
 ### Prerequisites
