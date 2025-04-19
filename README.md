@@ -34,7 +34,7 @@ HobbyStreak is a modern habit tracking application built with Next.js, focusing 
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/redsteadz/habitat
 cd hobbyist
 ```
 
