@@ -6,13 +6,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [GitHub],
   callbacks: {
     async signIn({ user, account, profile }) {
+      // console.log("user: ", user);
+      // console.log("account: ", account);
+      // console.log("profile: ", profile);
       if (!profile?.id) {
+        console.log("No profile id");
         return false;
       }
       if (!profile?.email) {
+        console.log("No profile email");
         return false;
       }
-      if (!profile?.name) {
+      if (!profile?.login) {
+        console.log("No profile name");
         return false;
       }
       try {
@@ -21,12 +27,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: profile.name,
+            name: profile.login,
             email: profile.email,
             githubId: profile.id,
           }),
         });
         if (resp.status !== 200) {
+          console.log("Error in signIn callback: ", resp.status);
           return false;
         }
         const data = await resp.json();
