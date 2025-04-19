@@ -1,6 +1,6 @@
-# HobbyStreak - Habit Tracking App
+# Habitat - Habit Tracking App
 
-HobbyStreak is a modern habit tracking application built with Next.js, focusing on positive reinforcement through visually appealing animations and intuitive design. Track your daily activities, build consistent habits, and visualize your progress over time.
+Habitat is a modern habit tracking application built with Next.js, focusing on positive reinforcement through visually appealing animations and intuitive design. Track your daily activities, build consistent habits, and visualize your progress over time.
 
 ## Features
 
