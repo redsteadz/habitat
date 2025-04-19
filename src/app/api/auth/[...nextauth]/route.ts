@@ -10,15 +10,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       // console.log("account: ", account);
       // console.log("profile: ", profile);
       if (!profile?.id) {
-        console.log("No profile id");
+        // console.log("No profile id");
         return false;
       }
       if (!profile?.email) {
-        console.log("No profile email");
+        // console.log("No profile email");
         return false;
       }
       if (!profile?.login) {
-        console.log("No profile name");
+        // console.log("No profile name");
         return false;
       }
       try {
