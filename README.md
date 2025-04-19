@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HobbyStreak - Habit Tracking App
+
+HobbyStreak is a modern habit tracking application built with Next.js, focusing on positive reinforcement through visually appealing animations and intuitive design. Track your daily activities, build consistent habits, and visualize your progress over time.
+
+## Features
+
+- 🎯 Daily habit tracking with streaks
+- ✨ Visually appealing animations and UI
+- 🌓 Dark/Light theme support
+- 📊 Progress visualization
+- 🔐 GitHub authentication
+- 🚀 Real-time updates
+- 📱 Responsive design
+
+## Tech Stack
+
+- **Framework:** Next.js 15.3
+- **Styling:** Tailwind CSS, Framer Motion
+- **Database:** PostgreSQL with Drizzle ORM
+- **Authentication:** NextAuth.js
+- **UI Components:** Radix UI, shadcn/ui
+- **Deployment:** Vercel/Netlify ready
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (18.18.0 or higher)
+- PostgreSQL
+- pnpm/npm/yarn/bun
+
+### Environment Setup
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd hobbyist
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a `.env` file in the root directory:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL="postgresql://admin:root@localhost:5432/test_db"
+GITHUB_ID=your_github_id
+GITHUB_SECRET=your_github_secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Development
 
-## Learn More
+1. Start the PostgreSQL database using Docker:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cd src/server/db
+docker-compose up -d
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Install dependencies:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm install
+```
 
-## Deploy on Vercel
+3. Set up the database:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm db:generate  # Generate migrations
+pnpm db:push      # Push migrations to database
+pnpm db:seed      # (Optional) Seed the database
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Start the development server:
+
+```bash
+pnpm dev
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+### Database Management
+
+- `pnpm db:migrate` - Run database migrations
+- `pnpm db:generate` - Generate new migrations
+- `pnpm db:push` - Push schema changes
+- `pnpm db:studio` - Open Drizzle Studio
+
+## Project Structure
+
+```
+src/
+├── app/              # Next.js app router
+├── components/       # Reusable components
+├── lib/             # Utility functions
+├── server/          # Server-side code
+│   └── db/          # Database configuration
+└── middleware.ts    # Next.js middleware
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+[Your chosen license]
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Animations powered by [Framer Motion](https://www.framer.com/motion/)
