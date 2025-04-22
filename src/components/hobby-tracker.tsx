@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { addDays, format, formatISO, previousDay, subDays } from "date-fns";
+import { addDays, format, formatISO, subDays } from "date-fns";
 import { AnimatedButton } from "./animated-button";
 import { CardBackground } from "./card-background";
 import axios from "axios";
@@ -28,58 +28,6 @@ import {
 } from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 
-// Mock data - Actual hobbies with tracking for the last 7 days
-const initialHobbies = [
-  {
-    id: 1,
-    name: "Morning Yoga",
-    category: "Wellness",
-    streak: 3,
-    history: [
-      { date: subDays(new Date(), 1), status: "done" },
-      { date: subDays(new Date(), 2), status: "done" },
-      { date: subDays(new Date(), 3), status: "done" },
-      { date: subDays(new Date(), 4), status: "skipped" },
-      { date: subDays(new Date(), 5), status: "done" },
-      { date: subDays(new Date(), 6), status: "skipped" },
-      { date: subDays(new Date(), 7), status: "done" },
-    ],
-    todayStatus: null,
-  },
-  {
-    id: 2,
-    name: "Read 30 Pages",
-    category: "Learning",
-    streak: 0,
-    history: [
-      { date: subDays(new Date(), 1), status: "skipped" },
-      { date: subDays(new Date(), 2), status: "skipped" },
-      { date: subDays(new Date(), 3), status: "done" },
-      { date: subDays(new Date(), 4), status: "done" },
-      { date: subDays(new Date(), 5), status: "skipped" },
-      { date: subDays(new Date(), 6), status: "done" },
-      { date: subDays(new Date(), 7), status: "done" },
-    ],
-    todayStatus: null,
-  },
-  {
-    id: 3,
-    name: "Practice Guitar",
-    category: "Music",
-    streak: 5,
-    history: [
-      { date: subDays(new Date(), 1), status: "done" },
-      { date: subDays(new Date(), 2), status: "done" },
-      { date: subDays(new Date(), 3), status: "done" },
-      { date: subDays(new Date(), 4), status: "done" },
-      { date: subDays(new Date(), 5), status: "done" },
-      { date: subDays(new Date(), 6), status: "skipped" },
-      { date: subDays(new Date(), 7), status: "skipped" },
-    ],
-    todayStatus: null,
-  },
-];
-
 type HobbyStatus = "done" | "skipped" | null;
 
 type HabitWithCompletions = Habit & {
@@ -89,64 +37,45 @@ type HabitWithCompletions = Habit & {
 
 export default function HobbyTracker({
   habits,
+  today,
 }: {
   habits: HabitWithCompletions[];
+  today: string;
 }) {
+  const todayD = new Date(today);
   const session = useSession();
   const [hobbies, setHobbies] = useState<HabitWithCompletions[]>(habits);
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
-  const today = addDays(new Date(), 0);
+  // const today = addDays(new Date(), 0);
   const [clickOrigins, setClickOrigins] = useState<
     Record<number, { x: number; y: number }>
   >({});
 
-  const setCompletions = () => {
+  const setTodayStatus = () => {
     setHobbies((prev) => {
-      return prev.map((hobby) => {
-        let newCompletions: Completion[] = [];
-        // for each hobby, return the completion of the last 7 days
-        // from last saturday to next friday
-        const lastSat = subDays(today, today.getDay() % 7);
-        // set todayStatus to the completion of today
-        const todayCompletion = hobby.completions.find((c) =>
+      return prev.map((habit) => {
+        const todayCompletion = habit.completions.find((c) =>
           format(new Date(c.date), "yyyy-MM-dd").includes(
             format(today, "yyyy-MM-dd"),
           ),
         );
         if (todayCompletion) {
           // console.log("todayCompletion: ", todayCompletion);
-          hobby.todayStatus = todayCompletion.completed ? "done" : "skipped";
+          habit.todayStatus = todayCompletion.completed ? "done" : "skipped";
         } else {
-          hobby.todayStatus = null;
+          habit.todayStatus = null;
         }
 
-        for (let i = 0; i < 7; i++) {
-          const date = addDays(lastSat, i);
-          const completion = hobby.completions.find((c) =>
-            format(new Date(c.date), "yyyy-MM-dd").includes(
-              format(date, "yyyy-MM-dd"),
-            ),
-          );
-          newCompletions.push({
-            id: completion ? completion.id : 0,
-            habitId: hobby.id,
-            date: date.toISOString(),
-            completed: completion?.completed ? true : false,
-          });
-        }
-        return {
-          ...hobby,
-          completions: newCompletions,
-        };
+        return habit;
       });
     });
   };
 
   useEffect(() => {
-    setCompletions();
-  }, []);
+    setTodayStatus();
+  },[]);
 
   const markHobbyStatus = (
     id: number,
@@ -205,11 +134,11 @@ export default function HobbyTracker({
         console.log("Previous Day", isPrevCompleted);
         // Calculate new streak
         if (status === "done") {
-          hobby.completions[today.getDay()].completed = true;
+          hobby.completions[todayD.getDay()].completed = true;
           newStreak++;
           toast.success("Hobby marked as done! 🎉");
         } else if (status === "skipped") {
-          hobby.completions[today.getDay()].completed = false;
+          hobby.completions[todayD.getDay()].completed = false;
           newStreak = 0;
         }
 
@@ -240,7 +169,7 @@ export default function HobbyTracker({
           userMail,
         });
         const newHobbyItem: HabitWithCompletions = res.data.habit;
-        const lastSat = subDays(today, today.getDay() % 7);
+        const lastSat = subDays(today, todayD.getDay() % 7);
         newHobbyItem.completions = Array.from({ length: 7 }, (_, i) => ({
           id: i,
           habitId: newHobbyItem.id,
