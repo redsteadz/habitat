@@ -39,7 +39,6 @@ export default async function DashboardPage() {
   const email = session?.user?.email!;
   // console.log("email:", email);
   // from the email get the userID
-
   const user = await getUser(email);
   if (!user) throw new Error("User not found");
   // // from the user ID, retrieve all the Habits
@@ -61,7 +60,7 @@ export default async function DashboardPage() {
       ),
     );
 
-    if (!prevCompletion?.completed) {
+    if (!todayCompletion?.completed) {
       // console.log(todayCompletion);
       habit.streak = todayCompletion?.completed ? habit.streak : 0;
     }
@@ -92,7 +91,7 @@ export default async function DashboardPage() {
   });
   // console.log("Habits: ", habits);
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-8">
+    <main className="min-h-screen py-8">
       <HobbyTracker habits={fixedHabits} today={today.toISOString()} />
     </main>
   );

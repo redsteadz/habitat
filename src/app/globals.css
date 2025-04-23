@@ -112,6 +112,12 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+body {
+  background-image: url("/marine-tunnel.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

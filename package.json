@@ -12,6 +12,7 @@
     "db:push": "drizzle-kit push",
     "db:seed": "npx tsx src/server/db/seed.ts",
     "db:studio": "drizzle-kit studio",
+    "db:run":"sudo docker-compose --project-directory 'src/server/db' up -d",
     "netlify:prod": "netlify deploy --prod --build"
   },
   "dependencies": {
@@ -50,6 +51,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "postcss": "^8.5.3",
+    "react-scan": "^0.3.3",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"
