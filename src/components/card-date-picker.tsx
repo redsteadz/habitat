@@ -129,14 +129,6 @@ export function DatePicker() {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    }).format(date);
-  };
-
   const isToday = (date: Date) => {
     const today = new Date();
     return (
@@ -183,30 +175,64 @@ export function DatePicker() {
     }
   };
 
+  // Add a click handler function for date selection
+  const handleDateClick = (index: number) => {
+    if (!scrollContainerRef.current) return;
+
+    const dateElements =
+      scrollContainerRef.current.querySelectorAll(".date-item");
+
+    if (dateElements[index]) {
+      const containerWidth = scrollContainerRef.current.offsetWidth;
+      const elementWidth = dateElements[index].clientWidth;
+
+      const scrollPosition =
+        dateElements[index].getBoundingClientRect().left +
+        scrollContainerRef.current.scrollLeft -
+        containerWidth / 2 +
+        elementWidth / 2;
+
+      scrollContainerRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: "smooth",
+      });
+
+      setSelectedDate(dates[index]);
+    }
+  };
+
+  // Update the return JSX to make text non-selectable and dates clickable
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-2">
+    <div className="w-full select-none">
+      <div className="flex items-center justify-between mb-1">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => scrollToDate("left")}
-          className="h-8 w-8"
+          className="h-6 w-6 p-0"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3 w-3" />
+          <span className="sr-only">Previous day</span>
         </Button>
-        <div className="text-center font-medium">
-          {selectedDate.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-          })}
+        <div className="text-center">
+          <div className="text-xs font-medium text-muted-foreground">
+            {selectedDate.toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            })}
+          </div>
+          <div className="text-sm font-medium">
+            {selectedDate.toLocaleDateString("en-US", { weekday: "short" })}
+          </div>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => scrollToDate("right")}
-          className="h-8 w-8"
+          className="h-6 w-6 p-0"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3" />
+          <span className="sr-only">Next day</span>
         </Button>
       </div>
 
@@ -216,12 +242,12 @@ export function DatePicker() {
         onMouseLeave={handleMouseLeave}
         onTouchEnd={handleMouseUp}
       >
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-primary/20 z-10" />
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-primary/10 z-10" />
 
         <div
           ref={scrollContainerRef}
           className={cn(
-            "flex overflow-x-auto scrollbar-hide py-4 px-4 snap-x snap-mandatory",
+            "flex overflow-x-auto scrollbar-hide py-2 px-2 snap-x snap-mandatory",
             isDragging ? "cursor-grabbing" : "cursor-grab",
           )}
           onScroll={handleScroll}
@@ -231,37 +257,30 @@ export function DatePicker() {
           onTouchMove={handleTouchMove}
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {dates.map((date, index) => (
-            <div
-              key={index}
-              data-index={index}
-              className={cn(
-                "date-item flex-shrink-0 mx-2 w-16 h-20 flex flex-col items-center justify-center rounded-lg snap-center transition-all duration-200 ease-out",
-                selectedDate.getDate() === date.getDate() &&
-                  selectedDate.getMonth() === date.getMonth() &&
-                  selectedDate.getFullYear() === date.getFullYear()
-                  ? "bg-primary text-primary-foreground scale-110 shadow-md"
-                  : "bg-muted hover:bg-muted/80",
-              )}
-            >
-              <div className="text-xs font-medium">
-                {date.toLocaleDateString("en-US", { weekday: "short" })}
-              </div>
+          {dates.map((date, index) => {
+            const isSelected =
+              selectedDate.getDate() === date.getDate() &&
+              selectedDate.getMonth() === date.getMonth() &&
+              selectedDate.getFullYear() === date.getFullYear();
+
+            return (
               <div
+                key={index}
+                data-index={index}
+                onClick={() => !isDragging && handleDateClick(index)}
                 className={cn(
-                  "text-2xl font-bold",
-                  isToday(date) &&
-                    selectedDate.getDate() !== date.getDate() &&
-                    "text-primary",
+                  "date-item flex-shrink-0 mx-1 w-8 h-8 flex flex-col items-center justify-center rounded-full snap-center transition-all duration-200 ease-out",
+                  isSelected
+                    ? "bg-primary/10 text-primary font-medium scale-105"
+                    : "hover:bg-muted/80",
+                  isToday(date) && !isSelected && "text-primary font-medium",
+                  "cursor-pointer select-none",
                 )}
               >
-                {date.getDate()}
+                <div className="text-sm">{date.getDate()}</div>
               </div>
-              <div className="text-xs">
-                {date.toLocaleDateString("en-US", { month: "short" })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -337,36 +337,7 @@ const HobbyDashCard = memo(function HobbyDashCard({
               Last 7 days:
             </div>
             <div className="flex justify-between w-full">
-              {hobby.completions.slice(0, 7).map((day, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center mb-1",
-                      day.completed
-                        ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500",
-                    )}
-                  >
-                    {day.completed ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                  </div>
-                  <span
-                    className={cn(
-                      "text-xs transition-colors duration-500",
-                      hobby.todayStatus === "done"
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : hobby.todayStatus === "skipped"
-                          ? "text-slate-600 dark:text-slate-400"
-                          : "text-slate-500 dark:text-slate-400",
-                    )}
-                  >
-                    {format(day.date, "E").charAt(0)}
-                  </span>
-                </div>
-              ))}
+              <DatePicker />
             </div>
           </div>
         </CardFooter>
