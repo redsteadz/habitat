@@ -29,12 +29,16 @@ import {
 } from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 
-type HobbyStatus = "done" | "skipped" | null;
+export type HobbyStatus = "done" | "skipped" | null;
 
-type HabitWithCompletions = Habit & {
+export type HabitWithCompletions = Habit & {
   completions: Completion[];
   todayStatus?: "done" | "skipped" | null;
 };
+
+export interface DateDictionary {
+  [date: string]: boolean;
+}
 
 const confettiVariants = {
   hidden: { opacity: 0 },
@@ -84,20 +88,59 @@ const rainDropVariants = {
 };
 
 const HobbyDashCard = memo(function HobbyDashCard({
-  hobby,
+  hobbyData,
   deleteHobby,
   markHobbyStatus,
-  clickOrigins,
 }: {
-  hobby: HabitWithCompletions;
+  hobbyData: HabitWithCompletions;
   deleteHobby: (id: number) => void;
-  markHobbyStatus: (
-    id: number,
-    status: HobbyStatus,
-    event: React.MouseEvent,
-  ) => void;
-  clickOrigins: Record<number, { x: number; y: number }>;
+  markHobbyStatus: (id: number, status: HobbyStatus) => void;
 }) {
+  const [dateDictionary, setDateDictionary] = useState<DateDictionary>({});
+  const [hobby, setHobby] = useState<HabitWithCompletions>(hobbyData);
+  const setHobbyStatus = (status: HobbyStatus) => {
+    setHobby((prev) => {
+      return { ...prev, todayStatus: status };
+    });
+    markHobbyStatus(hobby.id, status);
+  };
+  const setTodayStatus = (status: HobbyStatus) => {
+    setHobby((prev) => {
+      return { ...prev, todayStatus: status };
+    });
+  };
+
+  const today = new Date();
+
+  useEffect(() => {
+    setHobby((prev) => {
+      const todayCompletion = prev.completions.find(
+        (c) =>
+          format(new Date(c.date), "yyyy-MM-dd") ===
+          format(today, "yyyy-MM-dd"),
+      );
+      if (!todayCompletion?.completed) {
+        return {
+          ...prev,
+          todayStatus: "skipped",
+        };
+      }
+
+      return { ...prev, todayStatus: "done" };
+    });
+  }, []);
+
+  console.log(hobby.name, hobby.todayStatus);
+
+  useEffect(() => {
+    let newDateDict: DateDictionary = {};
+    hobby.completions.forEach((c) => {
+      const date = format(new Date(c.date), "yyyy-MM-dd");
+      const state = c.completed;
+      newDateDict[date] = state;
+    });
+    setDateDictionary(newDateDict);
+  }, []);
   return (
     <motion.div
       key={hobby.id}
@@ -113,8 +156,6 @@ const HobbyDashCard = memo(function HobbyDashCard({
             key={`bg-${hobby.id}-${hobby.todayStatus}`}
             status={hobby.todayStatus!}
             hobbyId={hobby.id}
-            originX={clickOrigins[hobby.id]?.x || 0.5}
-            originY={clickOrigins[hobby.id]?.y || 0.5}
           />
         </AnimatePresence>
 
@@ -265,7 +306,7 @@ const HobbyDashCard = memo(function HobbyDashCard({
               <AnimatedButton
                 variant="done"
                 active={hobby.todayStatus === "done"}
-                onClick={(e) => markHobbyStatus(hobby.id, "done", e)}
+                onClick={(e) => setHobbyStatus("done")}
               >
                 <Sparkles
                   className={cn(
@@ -281,7 +322,7 @@ const HobbyDashCard = memo(function HobbyDashCard({
               <AnimatedButton
                 variant="skip"
                 active={hobby.todayStatus === "skipped"}
-                onClick={(e) => markHobbyStatus(hobby.id, "skipped", e)}
+                onClick={(e) => setHobbyStatus("skipped")}
               >
                 <CloudRain
                   className={cn(
@@ -337,7 +378,10 @@ const HobbyDashCard = memo(function HobbyDashCard({
               Last 7 days:
             </div>
             <div className="flex justify-between w-full">
-              <DatePicker />
+              <DatePicker
+                DateDict={dateDictionary}
+                setTodayStatusAction={setTodayStatus}
+              />
             </div>
           </div>
         </CardFooter>
@@ -359,40 +403,8 @@ export default function HobbyTracker({
   const [newHobby, setNewHobby] = useState("");
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
-  // const today = addDays(new Date(), 0);
-  const [clickOrigins, setClickOrigins] = useState<
-    Record<number, { x: number; y: number }>
-  >({});
 
-  const setTodayStatus = () => {
-    setHobbies((prev) => {
-      return prev.map((habit) => {
-        const todayCompletion = habit.completions.find((c) =>
-          format(new Date(c.date), "yyyy-MM-dd").includes(
-            format(today, "yyyy-MM-dd"),
-          ),
-        );
-        if (todayCompletion) {
-          // console.log("todayCompletion: ", todayCompletion);
-          habit.todayStatus = todayCompletion.completed ? "done" : "skipped";
-        } else {
-          habit.todayStatus = null;
-        }
-
-        return habit;
-      });
-    });
-  };
-
-  useEffect(() => {
-    setTodayStatus();
-  }, []);
-
-  const markHobbyStatus = (
-    id: number,
-    status: HobbyStatus,
-    event: React.MouseEvent,
-  ) => {
+  const markHobbyStatus = (id: number, status: HobbyStatus) => {
     const makeUpdateCompletionRequest = async () => {
       const res = await axios.post("/api/completion/update", {
         habitId: id,
@@ -584,10 +596,9 @@ export default function HobbyTracker({
           {hobbies.map((hobby) => (
             <HobbyDashCard
               key={hobby.id}
-              hobby={hobby}
+              hobbyData={hobby}
               deleteHobby={deleteHobby}
               markHobbyStatus={markHobbyStatus}
-              clickOrigins={clickOrigins}
             />
           ))}
           <Toaster />

@@ -4,10 +4,22 @@ import type React from "react";
 
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  DateDictionary,
+  HobbyStatus,
+  HabitWithCompletions,
+} from "./hobby-tracker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
-export function DatePicker() {
+export function DatePicker({
+  DateDict,
+  setTodayStatusAction,
+}: {
+  DateDict: DateDictionary;
+  setTodayStatusAction: (status: HobbyStatus) => void;
+}) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dates, setDates] = useState<Date[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +32,7 @@ export function DatePicker() {
     const datesArray: Date[] = [];
     const today = new Date();
 
-    for (let i = -14; i <= 14; i++) {
+    for (let i = -14; i <= 2; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       datesArray.push(date);
@@ -28,7 +40,17 @@ export function DatePicker() {
 
     setDates(datesArray);
   }, []);
-
+  const setTodaysDate = (index: number) => {
+    const date_str = format(dates[index], "yyyy-MM-dd");
+    console.log(date_str);
+    console.log(DateDict[date_str]);
+    if (DateDict[date_str] === true) {
+      setTodayStatusAction("done");
+    } else {
+      setTodayStatusAction("skipped");
+    }
+    setSelectedDate(dates[index]);
+  };
   // Scroll to center on initial load
   useEffect(() => {
     if (scrollContainerRef.current && dates.length > 0) {
@@ -82,10 +104,10 @@ export function DatePicker() {
     });
 
     if (closestElement) {
-      const dateIndex = Number.parseInt(
+      const index = Number.parseInt(
         closestElement.getAttribute("data-index") || "0",
       );
-      setSelectedDate(dates[dateIndex]);
+      setTodaysDate(index);
     }
   };
 
@@ -148,7 +170,7 @@ export function DatePicker() {
         date.getFullYear() === selectedDate.getFullYear(),
     );
 
-    const newIndex =
+    const index =
       direction === "left"
         ? Math.max(0, currentIndex - 1)
         : Math.min(dates.length - 1, currentIndex + 1);
@@ -156,12 +178,12 @@ export function DatePicker() {
     const dateElements =
       scrollContainerRef.current.querySelectorAll(".date-item");
 
-    if (dateElements[newIndex]) {
+    if (dateElements[index]) {
       const containerWidth = scrollContainerRef.current.offsetWidth;
-      const elementWidth = dateElements[newIndex].clientWidth;
+      const elementWidth = dateElements[index].clientWidth;
 
       const scrollPosition =
-        dateElements[newIndex].getBoundingClientRect().left +
+        dateElements[index].getBoundingClientRect().left +
         scrollContainerRef.current.scrollLeft -
         containerWidth / 2 +
         elementWidth / 2;
@@ -170,8 +192,7 @@ export function DatePicker() {
         left: scrollPosition,
         behavior: "smooth",
       });
-
-      setSelectedDate(dates[newIndex]);
+      setTodaysDate(index);
     }
   };
 
@@ -196,8 +217,7 @@ export function DatePicker() {
         left: scrollPosition,
         behavior: "smooth",
       });
-
-      setSelectedDate(dates[index]);
+      setTodaysDate(index);
     }
   };
 

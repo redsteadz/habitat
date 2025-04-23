@@ -114,8 +114,10 @@
 
 body {
   background-image: url("/marine-tunnel.jpg");
+  background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  background-size: cover;
 }
 
 @layer base {

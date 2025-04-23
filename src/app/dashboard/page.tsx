@@ -48,12 +48,6 @@ export default async function DashboardPage() {
   const today = new Date();
   const yesterday = subDays(today, 1);
   const fixedHabits: HabitWithCompletions[] = habits.map((habit) => {
-    // update the streak according to if the previous day is completed
-    const prevCompletion = habit.completions.find((c) =>
-      format(new Date(c.date), "yyyy-MM-dd").includes(
-        format(yesterday, "yyyy-MM-dd"),
-      ),
-    );
     const todayCompletion = habit.completions.find((c) =>
       format(new Date(c.date), "yyyy-MM-dd").includes(
         format(today, "yyyy-MM-dd"),
