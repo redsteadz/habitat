@@ -159,6 +159,10 @@ export function DatePicker({
       date.getFullYear() === today.getFullYear()
     );
   };
+  const isCompleted = (date: Date) => {
+    const date_str = format(date, "yyyy-MM-dd");
+    return DateDict[date_str];
+  };
 
   const scrollToDate = (direction: "left" | "right") => {
     if (!scrollContainerRef.current) return;
@@ -294,6 +298,7 @@ export function DatePicker({
                     ? "bg-primary/10 text-primary font-medium scale-105"
                     : "hover:bg-muted/80",
                   isToday(date) && !isSelected && "text-primary font-medium",
+                  isCompleted(date) ? "bg-emerald-500" : "bg-slate-500",
                   "cursor-pointer select-none",
                 )}
               >
