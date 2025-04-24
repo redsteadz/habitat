@@ -1,28 +1,43 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface CardBackgroundProps {
-  status: "done" | "skipped" | null
-  originX?: number
-  originY?: number
-  hobbyId: number
+  status: "done" | "skipped" | null;
+  originX?: number;
+  originY?: number;
+  hobbyId: number;
 }
 
-export function CardBackground({ status, originX = 0.5, originY = 0.5, hobbyId }: CardBackgroundProps) {
-  if (!status) return null
+export function CardBackground({
+  status,
+  originX = 0.5,
+  originY = 0.5,
+  hobbyId,
+}: CardBackgroundProps) {
+  if (!status) return null;
 
   const colors = {
     done: {
       light: ["#d1fae5", "#a7f3d0", "#6ee7b7", "#d1fae5"],
-      dark: ["rgba(6, 78, 59, 0.4)", "rgba(6, 95, 70, 0.3)", "rgba(5, 150, 105, 0.2)", "rgba(6, 78, 59, 0.4)"],
+      dark: [
+        "rgba(6, 78, 59, 0.4)",
+        "rgba(6, 95, 70, 0.3)",
+        "rgba(5, 150, 105, 0.2)",
+        "rgba(6, 78, 59, 0.4)",
+      ],
     },
     skipped: {
       light: ["#f3f4f6", "#e5e7eb", "#d1d5db", "#f3f4f6"],
-      dark: ["rgba(31, 41, 55, 0.4)", "rgba(55, 65, 81, 0.3)", "rgba(75, 85, 99, 0.2)", "rgba(31, 41, 55, 0.4)"],
+      dark: [
+        "rgba(31, 41, 55, 0.4)",
+        "rgba(55, 65, 81, 0.3)",
+        "rgba(75, 85, 99, 0.2)",
+        "rgba(31, 41, 55, 0.4)",
+      ],
     },
-  }
+  };
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -37,7 +52,9 @@ export function CardBackground({ status, originX = 0.5, originY = 0.5, hobbyId }
         <motion.div
           className={cn(
             "absolute inset-0 opacity-40 dark:opacity-30",
-            status === "done" ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-slate-100 dark:bg-slate-800/20",
+            status === "done"
+              ? "bg-emerald-50 dark:bg-emerald-900/20"
+              : "bg-slate-100 dark:bg-slate-800/20",
           )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -47,12 +64,14 @@ export function CardBackground({ status, originX = 0.5, originY = 0.5, hobbyId }
 
         {/* Animated gradient blobs */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(3)].map((_, i) => (
+          {[...Array(1)].map((_, i) => (
             <motion.div
               key={i}
               className={cn(
                 "absolute rounded-full blur-2xl opacity-30 dark:opacity-20",
-                status === "done" ? "bg-emerald-300 dark:bg-emerald-500" : "bg-slate-300 dark:bg-slate-500",
+                status === "done"
+                  ? "bg-emerald-300 dark:bg-emerald-500"
+                  : "bg-slate-300 dark:bg-slate-500",
               )}
               initial={{
                 x: `${originX * 100}%`,
@@ -88,5 +107,5 @@ export function CardBackground({ status, originX = 0.5, originY = 0.5, hobbyId }
         </div>
       </motion.div>
     </div>
-  )
+  );
 }

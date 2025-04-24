@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DateDictionary,
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
-export function DatePicker({
+export const DatePicker = memo(function DatePicker({
   DateDict,
   setTodayStatusAction,
 }: {
@@ -32,7 +32,7 @@ export function DatePicker({
     const datesArray: Date[] = [];
     const today = new Date();
 
-    for (let i = -14; i <= 2; i++) {
+    for (let i = -7; i <= 2; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       datesArray.push(date);
@@ -310,4 +310,4 @@ export function DatePicker({
       </div>
     </div>
   );
-}
+});

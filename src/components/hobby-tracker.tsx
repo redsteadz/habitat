@@ -269,65 +269,6 @@ const HobbyDashCard = memo(function HobbyDashCard({
           </div>
 
           <div className="relative">
-            {/* Status animation container */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <AnimatePresence>
-                {hobby.todayStatus === "done" && (
-                  <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    variants={confettiVariants}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {Array.from({ length: 20 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        variants={confettiItemVariants}
-                        className="absolute"
-                        style={{
-                          top: `${Math.random() * 100}%`,
-                          left: `${Math.random() * 100}%`,
-                          width: `${Math.random() * 8 + 4}px`,
-                          height: `${Math.random() * 8 + 4}px`,
-                          backgroundColor: [
-                            "#10B981",
-                            "#3B82F6",
-                            "#EC4899",
-                            "#F59E0B",
-                            "#8B5CF6",
-                          ][Math.floor(Math.random() * 5)],
-                          borderRadius: "50%",
-                        }}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-
-                {hobby.todayStatus === "skipped" && (
-                  <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    variants={rainVariants}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {Array.from({ length: 15 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        variants={rainDropVariants}
-                        className="absolute bg-slate-400 dark:bg-slate-600 rounded-full w-1 h-3"
-                        style={{
-                          top: `${Math.random() * 100}%`,
-                          left: `${Math.random() * 100}%`,
-                        }}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             <div className="flex gap-3 justify-center">
               <AnimatedButton
                 variant="done"
