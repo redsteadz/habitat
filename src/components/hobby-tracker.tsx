@@ -124,6 +124,11 @@ const HobbyDashCard = memo(function HobbyDashCard({
         todayStatus: status,
       };
     });
+    setDateDictionary((prev) => {
+      const date_str = format(today, "yyyy-MM-dd");
+      prev[date_str] = status === "done" ? true : false;
+      return { ...prev };
+    });
     updateHabit(hobby.id, status);
   };
   // Used to update the todays status date wise according to previous iterations
@@ -386,18 +391,6 @@ const HobbyDashCard = memo(function HobbyDashCard({
           </div>
 
           <div className="w-full">
-            <div
-              className={cn(
-                "text-sm font-medium mb-2 transition-colors duration-500",
-                hobby.todayStatus === "done"
-                  ? "text-emerald-800 dark:text-emerald-300"
-                  : hobby.todayStatus === "skipped"
-                    ? "text-slate-700 dark:text-slate-300"
-                    : "",
-              )}
-            >
-              Last 7 days:
-            </div>
             <div className="flex justify-between w-full">
               <DatePicker
                 DateDict={dateDictionary}

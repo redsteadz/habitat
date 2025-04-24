@@ -295,7 +295,7 @@ export function DatePicker({
                 className={cn(
                   "date-item flex-shrink-0 mx-1 w-8 h-8 flex flex-col items-center justify-center rounded-full snap-center transition-all duration-200 ease-out",
                   isSelected
-                    ? "bg-primary/10 text-primary font-medium scale-105"
+                    ? "bg-primary/10 text-primary font-medium scale-105 border-cyan-500 border-4"
                     : "hover:bg-muted/80",
                   isToday(date) && !isSelected && "text-primary font-medium",
                   isCompleted(date) ? "bg-emerald-500" : "bg-slate-500",

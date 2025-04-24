@@ -59,28 +59,8 @@ export default async function DashboardPage() {
       habit.streak = todayCompletion?.completed ? habit.streak : 0;
     }
 
-    let newCompletions: Completion[] = [];
-    // for each hobby, return the completion of the last 7 days
-    // from last saturday to next friday
-    const lastSat = subDays(today, today.getDay() % 7);
-
-    for (let i = 0; i < 7; i++) {
-      const date = addDays(lastSat, i);
-      const completion = habit.completions.find((c) =>
-        format(new Date(c.date), "yyyy-MM-dd").includes(
-          format(date, "yyyy-MM-dd"),
-        ),
-      );
-      newCompletions.push({
-        id: completion ? completion.id : 0,
-        habitId: habit.id,
-        date: date.toISOString(),
-        completed: completion?.completed ? true : false,
-      });
-    }
     return {
       ...habit,
-      completions: newCompletions,
     };
   });
   // console.log("Habits: ", habits);
