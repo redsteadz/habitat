@@ -90,27 +90,48 @@ const rainDropVariants = {
 const HobbyDashCard = memo(function HobbyDashCard({
   hobbyData,
   deleteHobby,
-  markHobbyStatus,
+  updateHabit,
 }: {
   hobbyData: HabitWithCompletions;
   deleteHobby: (id: number) => void;
-  markHobbyStatus: (id: number, status: HobbyStatus) => void;
+  updateHabit: (id: number, status: HobbyStatus) => Promise<void>;
 }) {
   const [dateDictionary, setDateDictionary] = useState<DateDictionary>({});
   const [hobby, setHobby] = useState<HabitWithCompletions>(hobbyData);
+  const today = new Date();
+  const yesterday = subDays(today, 1);
+
   const setHobbyStatus = (status: HobbyStatus) => {
+    // IF no change
+    if (status === hobby.todayStatus) return;
+    // if the previous day completion exists and is completed than the new streak is ++
+    // otherwise it is 0
     setHobby((prev) => {
-      return { ...prev, todayStatus: status };
+      const prevCompletion = prev.completions.find(
+        (e) => formatISO(yesterday, { representation: "date" }) == e.date,
+      );
+      let streak = 0;
+      if (prevCompletion && prevCompletion.completed) {
+        streak = prev.streak;
+      }
+
+      if (status === "done") streak++;
+      else streak = 0;
+
+      return {
+        ...prev,
+        streak: streak,
+        todayStatus: status,
+      };
     });
-    markHobbyStatus(hobby.id, status);
+    updateHabit(hobby.id, status);
   };
+  // Used to update the todays status date wise according to previous iterations
   const setTodayStatus = (status: HobbyStatus) => {
     setHobby((prev) => {
       return { ...prev, todayStatus: status };
     });
   };
-
-  const today = new Date();
 
   useEffect(() => {
     setHobby((prev) => {
@@ -404,65 +425,16 @@ export default function HobbyTracker({
   const [newCategory, setNewCategory] = useState("General");
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const markHobbyStatus = (id: number, status: HobbyStatus) => {
-    const makeUpdateCompletionRequest = async () => {
-      const res = await axios.post("/api/completion/update", {
-        habitId: id,
-        userMail: session.data?.user?.email,
-        status: status === "done" ? true : false,
-      });
-      if (res.status === 200) {
-        toast.success("Habit status updated successfully!");
-      } else {
-        toast.error("Error updating habit status.");
-      }
-    };
-    let chng = false;
-    let yesterday = formatISO(subDays(new Date(today), 1), {
-      representation: "date",
+  const updateHabit = async (id: number, status: HobbyStatus) => {
+    const res = await axios.post("/api/completion/update", {
+      habitId: id,
+      userMail: session.data?.user?.email,
+      status: status === "done" ? true : false,
     });
-
-    // TODO: Update Streak properly !
-    let newHobbies = hobbies.map((hobby) => {
-      if (hobby.id === id) {
-        // If clicking the same status again, toggle it off
-        if (hobby.todayStatus === status) {
-          // hobby.completions[today.getDay()].completed = false;
-          return hobby;
-        }
-        console.log(yesterday);
-        let isPrevCompleted = hobby.completions.filter(
-          (e) => formatISO(e.date, { representation: "date" }) == yesterday,
-        );
-
-        console.log(hobby.completions);
-
-        chng = true;
-        let newStreak = 0;
-        if (isPrevCompleted.length > 0 && isPrevCompleted[0].completed)
-          newStreak = hobby.streak;
-        console.log("Previous Day", isPrevCompleted);
-        // Calculate new streak
-        if (status === "done") {
-          hobby.completions[todayD.getDay()].completed = true;
-          newStreak++;
-          // toast.success("Hobby marked as done! 🎉");
-        } else if (status === "skipped") {
-          hobby.completions[todayD.getDay()].completed = false;
-          newStreak = 0;
-        }
-
-        return {
-          ...hobby,
-          todayStatus: status,
-          streak: newStreak,
-        };
-      }
-      return hobby;
-    });
-    if (chng) {
-      makeUpdateCompletionRequest();
-      setHobbies(newHobbies);
+    if (res.status === 200) {
+      toast.success("Habit status updated successfully!");
+    } else {
+      toast.error("Error updating habit status.");
     }
   };
 
@@ -598,7 +570,7 @@ export default function HobbyTracker({
               key={hobby.id}
               hobbyData={hobby}
               deleteHobby={deleteHobby}
-              markHobbyStatus={markHobbyStatus}
+              updateHabit={updateHabit}
             />
           ))}
           <Toaster />
