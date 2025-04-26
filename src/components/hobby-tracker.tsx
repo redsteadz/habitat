@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useEffect, useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Check, Calendar, Sparkles, CloudRain } from "lucide-react";
+import { Plus, X, Calendar, Sparkles, CloudRain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "./card-date-picker";
@@ -17,15 +17,13 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast, Toaster } from "sonner";
-import { addDays, format, formatISO, subDays } from "date-fns";
+import { format, formatISO, subDays } from "date-fns";
 import { AnimatedButton } from "./animated-button";
 import { CardBackground } from "./card-background";
 import axios from "axios";
 import {
   Completion,
-  completionsTable,
   Habit,
-  habitsTable,
 } from "@/server/db/schema";
 import { useSession } from "next-auth/react";
 
@@ -40,52 +38,6 @@ export interface DateDictionary {
   [date: string]: boolean;
 }
 
-const confettiVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const confettiItemVariants = {
-  hidden: { opacity: 0, scale: 0 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-    },
-  },
-};
-
-// Rain animation for "Skipped" status
-const rainVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const rainDropVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 0.7,
-    y: 20,
-    transition: {
-      repeat: 3,
-      repeatType: "loop" as const,
-      duration: 1.5,
-    },
-  },
-};
 
 const HobbyDashCard = memo(function HobbyDashCard({
   hobbyData,
@@ -156,7 +108,7 @@ const HobbyDashCard = memo(function HobbyDashCard({
     });
   }, []);
 
-  console.log(hobby.name, hobby.todayStatus);
+  // console.log(hobby.name, hobby.todayStatus);
 
   useEffect(() => {
     let newDateDict: DateDictionary = {};

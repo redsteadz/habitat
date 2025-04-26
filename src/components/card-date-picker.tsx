@@ -298,7 +298,7 @@ export const DatePicker = memo(function DatePicker({
                     ? "bg-primary/10 text-primary font-medium scale-105 border-cyan-500 border-4"
                     : "hover:bg-muted/80",
                   isToday(date) && !isSelected && "text-primary font-medium",
-                  isCompleted(date) ? "bg-emerald-500" : "bg-slate-500",
+                  isCompleted(date) ? "bg-emerald-700" : "bg-slate-800",
                   "cursor-pointer select-none",
                 )}
               >

@@ -71,7 +71,7 @@ export default function DynamicIsland() {
           mass: 1,
         }}
         className={cn(
-          "bg-black text-white flex flex-col overflow-hidden shadow-lg",
+          "bg-bluish text-white flex flex-col overflow-hidden shadow-lg",
           isExpanded ? "items-stretch" : "items-center justify-center",
         )}
         onMouseEnter={() => setIsHovered(true)}
