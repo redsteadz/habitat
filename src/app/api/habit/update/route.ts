@@ -27,18 +27,18 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
-    const habit = await db.query.habitsTable.findFirst({
-      where: eq(habitsTable.id, habitId),
-    });
-    if (!habit) {
-      return NextResponse.json(
-        {
-          message: "Habit not found",
-        },
-        { status: 404 },
-      );
-    }
-    await db.delete(habitsTable).where(eq(habitsTable.id, habit.id));
+    // const habit = await db.query.habitsTable.findFirst({
+    //   where: eq(habitsTable.id, habitId),
+    // });
+    // if (!habit) {
+    //   return NextResponse.json(
+    //     {
+    //       message: "Habit not found",
+    //     },
+    //     { status: 404 },
+    //   );
+    // }
+    await db.delete(habitsTable).where(eq(habitsTable.id, habitId));
     return NextResponse.json({
       message: "Habit removed successfully",
     });

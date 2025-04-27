@@ -29,14 +29,14 @@ export async function POST(req: NextRequest) {
   }
   assert(typeof status == "boolean");
   try {
-    const userId = await db.query.usersTable
-      .findFirst({
-        where: eq(usersTable.email, userMail),
-      })
-      .then((user) => user?.id);
-    if (!userId) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+    // const userId = await db.query.usersTable
+    //   .findFirst({
+    //     where: eq(usersTable.email, userMail),
+    //   })
+    //   .then((user) => user?.id);
+    // if (!userId) {
+    //   return NextResponse.json({ message: "User not found" }, { status: 404 });
+    // }
     const habit = await db.query.habitsTable.findFirst({
       where: eq(habitsTable.id, habitId),
     });
@@ -49,12 +49,6 @@ export async function POST(req: NextRequest) {
       );
     }
     const today = addDays(new Date(), 0).toISOString();
-    const newCompletion: typeof completionsTable.$inferInsert = {
-      date: today,
-      completed: status,
-      habitId: habit.id,
-    };
-
     // console.log(newCompletion);
 
     let isExisting = await db.query.completionsTable.findFirst({
@@ -70,21 +64,19 @@ export async function POST(req: NextRequest) {
         eq(completionsTable.habitId, habitId),
       ),
     });
-
+    const newCompletion: typeof completionsTable.$inferInsert = {
+      date: today,
+      completed: status,
+      streak: previousCompletion ? previousCompletion.streak : 0,
+      habitId: habit.id,
+    };
+    if (status) newCompletion.streak = (newCompletion.streak ?? 0) + 1;
+    else newCompletion.streak = 0;
     let completion;
-    if (!isExisting) {
-      // IF not existing re use and update
-      completion = await db
-        .insert(completionsTable)
-        .values(newCompletion)
-        .returning();
-    } else if (isExisting.completed != status) {
-      // console.log("Updating completion");
+    if (isExisting) {
       completion = await db
         .update(completionsTable)
-        .set({
-          completed: status,
-        })
+        .set(newCompletion)
         .where(
           and(
             eq(completionsTable.date, today),
@@ -92,24 +84,19 @@ export async function POST(req: NextRequest) {
           ),
         )
         .returning();
+    } else {
+      completion = await db
+        .insert(completionsTable)
+        .values(newCompletion)
+        .returning();
     }
-
-    let newStreak = 0;
-    if (previousCompletion?.completed) {
-      const habit = await db.query.habitsTable.findFirst({
-        where: eq(habitsTable.id, habitId),
-      });
-
-      newStreak = habit?.streak!;
-    }
-
-    if (status) {
-      newStreak++;
-    } else newStreak = 0;
-
+    habit.streak = newCompletion.streak;
+    // console.log("New streak", habit.streak);
     await db
       .update(habitsTable)
-      .set({ streak: newStreak })
+      .set({
+        streak: habit.streak,
+      })
       .where(eq(habitsTable.id, habitId));
 
     return NextResponse.json({

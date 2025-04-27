@@ -42,6 +42,7 @@ export const completionsTable = pgTable("completions", {
     .notNull()
     .references(() => habitsTable.id),
   date: date().notNull(),
+  streak: integer().default(0),
   completed: boolean().notNull(),
 });
 
